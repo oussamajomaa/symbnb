@@ -21,10 +21,16 @@ class AdController extends AbstractController
      */
     public function create(Request $request, EntityManagerInterface $manager)
     {
-        $ad = new Ad();
+        $ad = new Ad(); 
         $form=$this->createForm(AdType::class, $ad);
         $form->handleRequest($request);
+       
         if ($form->isSubmitted() && $form->isValid()){
+            foreach($ad->getImages() as $image){
+                $image->setAd($ad);
+                $manager->persist($image);
+            }
+            $ad->setAuthor($this->getUser());
             $manager->persist($ad);
             $manager->flush();
 
@@ -38,7 +44,41 @@ class AdController extends AbstractController
         }
 
         return $this->render('ad/new.html.twig',[
-            'form'=>$form->createView()
+            'form'  => $form->createView()
+            
+        ]);
+    }
+
+    /**
+     * permet d'éditer une annonce
+     *
+     * @Route("/ads/{slug}/edit",name="ad_edit")
+     */
+    public function edit(Ad $ad, Request $request, EntityManagerInterface $manager)
+    {
+        // $ad=$repo->findOneBySlug($slug);
+        $form=$this->createForm(AdType::class,$ad);
+        $form->handleRequest($request);
+
+        if ($form->isSubmitted() && $form->isValid()) {
+            foreach ($ad->getImages() as $image) {
+                $image->setAd($ad);
+                $manager->persist($image);
+            }
+            $manager->persist($ad);
+            $manager->flush();
+
+            $this->addFlash(
+                "warning",
+                "Les modification de l'annonce <strong>{$ad->getTitle()}</strong> ont bien été enregistrées"
+            );
+            return $this->redirectToRoute('ads_show', [
+                'slug' => $ad->getSlug()
+            ]);
+        }
+        return $this->render("ad/edit.html.twig", [
+            "form"=>$form->createView(),
+            'ad'    => $ad
         ]);
     }
     
@@ -60,9 +100,9 @@ class AdController extends AbstractController
      * @Route("/ads/{slug}", name="ads_show")
      */
     
-    public function show($slug, AdRepository $repo)
+    public function show(Ad $ad)
     {
-        $ad=$repo->findOneBySlug($slug);
+        // $ad=$repo->findOneBySlug($slug);
         return $this->render('ad/show.html.twig', [
             'ad' => $ad
         ]);

@@ -3,40 +3,35 @@
 namespace App\Form;
 
 use App\Entity\Ad;
-use Doctrine\DBAL\Types\FloatType;
-use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ButtonType;
+use App\Form\ApplicationType;
+use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\TextType as TypeTextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-class AdType extends AbstractType
+class AdType extends ApplicationType
 {
-    private function attr($label,$placeholder){
-        return  [
-                "label"=>$label,
-                "attr"=>[
-                    "placeholder"=>$placeholder
-                ]
-            ];
-    }
-
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('title', TypeTextType::class, [
-                "label"=>"Titre de l'annonce",
-                "attr"=>[
-                    "placeholder"=>"entrer le titre de l'annonce"
-                ]
-            ])
-            ->add('slug')
+            ->add('title', TypeTextType::class, $this->attr("Titre de l'annonce", "Entrer le titre de l'annonce"))
+            ->add('slug', TypeTextType::class, $this->attr("L'adresse web de l'annonce","Adresse web automatique", 
+                [
+                'disabled' => true
+                ])
+            )
             ->add('price', MoneyType::class, $this->attr('Prix','entrer le prix'))
             ->add('introduction')
             ->add('content')
             ->add('coverImage')
             ->add('rooms')
+            ->add('images', CollectionType::class, [
+                // les champs que je dois répéter
+                'entry_type'    => ImageType::class,
+                'allow_add'     => true,
+                'allow_delete'  => true
+            ])
            
         ;
     }

@@ -1,0 +1,36 @@
+{# Ce bloc va nous permettre de modifier la sortie form_widget sur un champ donné #}
+{% block _ad_images_widget %}
+<p class="h5">Ici, vous pouvez ajouter vos images !</p>
+{# la vairable form ici représente le sous formulaire image #}
+{{form_widget(form)}}
+<div class="form-group">
+    <button type="button" class="btn btn-info" id="add-image">Ajouter une image</button>
+</div>
+{% endblock %}
+
+
+{% block _ad_images_entry_widget %}
+<div class="form-group" id="bloc-{{id}}">
+    <div class="row">
+        <div class="col-10">
+            <div class="row">
+                <div class="col form">
+                    {# la variable form ici représente  #}
+                    {{ form_widget(form.url)}}
+                </div>
+                <div class="col">
+                    {{ form_widget(form.caption)}}
+                </div>
+            </div>
+        </div>
+        <div class="col-2">
+            <button type="button" class="btn btn-danger del-sous-form" data-target="#bloc-{{id}}" id="">X</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block _ad_images_entry_row %}
+{{ form_widget(form) }}
+{% endblock %}
+

@@ -3,15 +3,21 @@
 namespace App\Entity;
 
 use Cocur\Slugify\Slugify;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
+use App\Repository\AdRepository;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping\HasLifecycleCallbacks;
-
+use Doctrine\Common\Collections\ArrayCollection;
+use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
  * @ORM\Entity(repositoryClass=AdRepository::class)
  * @HasLifecycleCallbacks
+ * @UniqueEntity(
+ *     fields={"title"},
+ *     message="Ce titre existe déjà pour une autre annonce"
+ * )
  */
 class Ad
 {
@@ -23,6 +29,8 @@ class Ad
     private $id;
 
     /**
+     * @Assert\Length(min=10,max=50,
+     * minMessage="tout court", maxMessage="très long")
      * @ORM\Column(type="string", length=255)
      */
     private $title;
@@ -59,8 +67,15 @@ class Ad
 
     /**
      * @ORM\OneToMany(targetEntity=Image::class, mappedBy="ad", orphanRemoval=true)
+     * @Assert\Valid()
      */
     private $images;
+
+    /**
+     * @ORM\ManyToOne(targetEntity=User::class, inversedBy="ads")
+     * @ORM\JoinColumn(nullable=false)
+     */
+    private $author;
 
     public function __construct()
     {
@@ -75,9 +90,9 @@ class Ad
      */
     public function inistializeSlug(){
         $slugify = new Slugify();
-        if (empty($this->slug)){
+
             $this->slug=$slugify->slugify($this->title);
-        }
+        
     }
 
     public function getId(): ?int
@@ -102,12 +117,12 @@ class Ad
         return $this->slug;
     }
 
-    public function setSlug(string $slug): self
-    {
-        $this->slug = $slug;
+    // public function setSlug(string $slug): self
+    // {
+    //     $this->slug = $slug;
 
-        return $this;
-    }
+    //     return $this;
+    // }
 
     public function getPrice(): ?float
     {
@@ -196,6 +211,18 @@ class Ad
                 $image->setAd(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getAuthor(): ?User
+    {
+        return $this->author;
+    }
+
+    public function setAuthor(?User $author): self
+    {
+        $this->author = $author;
 
         return $this;
     }
