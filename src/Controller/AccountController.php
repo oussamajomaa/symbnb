@@ -2,18 +2,19 @@
 
 namespace App\Controller;
 
-use App\Entity\PasswordUpdate;
 use App\Entity\User;
 use App\Form\AccountType;
-use App\Form\PasswordUpdateType;
+use App\Entity\PasswordUpdate;
 use App\Form\RegistrationType;
-use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Form\PasswordUpdateType;
 use Symfony\Component\Form\FormError;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use Symfony\Component\Security\Core\Encoder\UserPasswordEncoderInterface;
 
 class AccountController extends AbstractController
 {
@@ -69,6 +70,7 @@ class AccountController extends AbstractController
      * permet de modifier le profil d'un utilisateur
      *
      * @Route("/account/profile",name="account_profile")
+     * @IsGranted("ROLE_USER")
      */
     public function profile(Request $request, EntityManagerInterface $manager)
     {
@@ -90,6 +92,7 @@ class AccountController extends AbstractController
      * permet de modifier le mot de passe
      *
      * @Route("/account/password", name="account_password")
+     * @IsGranted("ROLE_USER")
      */
     public function updatePassword(Request $request, EntityManagerInterface $manager, UserPasswordEncoderInterface $encoder)
     {
@@ -134,6 +137,7 @@ class AccountController extends AbstractController
     /**
      * permet d'afficher le profil d'un utilisateur
      * @Route("/account",name="account_index")
+     * @IsGranted("ROLE_USER")
      */
     public function myAccount()
     {

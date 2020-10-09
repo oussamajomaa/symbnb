@@ -8,6 +8,8 @@ use App\Repository\AdRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\IsGranted;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class AdController extends AbstractController
@@ -17,7 +19,7 @@ class AdController extends AbstractController
      * Permet d'ajouter une annonce et rediriger vers l'annonce ajouté
      * 
      * @Route("/ads/new", name="ads_create")
-     *
+     * @IsGranted("ROLE_USER")
      */
     public function create(Request $request, EntityManagerInterface $manager)
     {
@@ -53,6 +55,7 @@ class AdController extends AbstractController
      * permet d'éditer une annonce
      *
      * @Route("/ads/{slug}/edit",name="ad_edit")
+     * @Security("is_granted('ROLE_USER') and user === ad.getAuthor()")
      */
     public function edit(Ad $ad, Request $request, EntityManagerInterface $manager)
     {
