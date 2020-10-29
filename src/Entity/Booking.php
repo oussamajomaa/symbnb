@@ -35,12 +35,14 @@ class Booking
     /**
      * @ORM\Column(type="datetime")
      * @Assert\Type("\DateTimeInterface")
+     * @Assert\GreaterThan("today", message="La date d'arrivée doit être ultérieure à la date d'aujourd'hui!")
      */
     private $startDate;
 
     /**
      * @ORM\Column(type="datetime")
      * @Assert\Type("\DateTimeInterface")
+     * @Assert\GreaterThan(propertyPath="startDate", message="La date de départ doit être plus éloignée que la date d'arrivée!")
      */
     private $endDate;
 
@@ -165,9 +167,52 @@ class Booking
         }
     }
 
+    /**
+     * retourner le nombre de jours entre deux dates
+     */
     public function getDuration()
     {
         $diff = $this->endDate->diff($this->startDate);
         return $diff->days;
+    }
+
+
+    public function isBookableDates()
+    {
+        // il faut connaitre les dates qui ne sont pas disponibles
+        $notAvailableDays = $this->ad->getNotAvailaibleDays();
+        // il faut comparer ces dates avec mes dates de réservation
+        $bookingDays = $this->getDays();
+        
+        // transformer les deux tableaux dateTime en chaine de caractère pour faciliter la comparaison
+        $notAvailable = array_map(function($day){
+            return $day->format('Y-m-d');
+        },$notAvailableDays);
+
+        $bookings = array_map(function($day){
+            return $day->format("Y-m-d");
+        },$bookingDays);
+
+        foreach ($bookings as $booking){
+            if (array_search($booking, $notAvailable) !== false) return false;
+        }
+        return true;
+    }
+
+    /**
+     * permet d'avoir un tableau des jours correspondant à ma réservation
+     * @return array un tableau d'objet dateTime
+     */
+    public function getDays()
+    {
+        $resultat = range(
+            $this->startDate->getTimestamp(),
+            $this->endDate->getTimestamp(),
+            24*60*60
+        );
+        $days = array_map(function($daystamp){
+            return new \DateTime(date("Y-m-d", $daystamp));
+        },$resultat);
+        return $days;
     }
 }

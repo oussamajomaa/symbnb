@@ -7,6 +7,7 @@ use App\Form\AccountType;
 use App\Entity\PasswordUpdate;
 use App\Form\RegistrationType;
 use App\Form\PasswordUpdateType;
+use App\Repository\UserRepository;
 use Symfony\Component\Form\FormError;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
@@ -144,5 +145,15 @@ class AccountController extends AbstractController
         return $this->render("user/index.html.twig",[
             "user" => $this->getUser()
         ]);
+    }
+
+    /**
+     * permet d'afficher les bookings faites par l'utilisateur
+     * @Route("/account/bookings", name="account_bookings")
+     * @IsGranted("ROLE_USER")
+     */
+    public function bookings()
+    {
+        return $this->render('account/bookings.html.twig');
     }
 }

@@ -23,44 +23,22 @@ class BookingController extends AbstractController
         $form = $this->createForm(BookingType::class, $booking);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()){
-            // $booking->setCreatedAt(new \DateTime());
-            // pour calculer la difference entre deux dates
-            // $diff = $booking->getEndDate()->diff($booking->getStartDate());
-            // $days=$diff->days;
-            // $booking->setAmount($ad->getPrice()*$days);
-            $notAvailableDays=[];
-            $bookings = $ad->getBookings();
-            // dd($bookings);
-            foreach ($bookings as $book){
-                $resultat=range(
-                    $book->getStartDate()->getTimestamp(),
-                    $book->getEndDate()->getTimestamp(),
-                    24 * 60 * 60 );
-
-                $days=array_map(function($dayTimestamp){
-                    return new \DateTime(date("Y-m-d",$dayTimestamp));
-                }, $resultat);
-                $notAvailableDays= array_merge($notAvailableDays,$days);
-            }
-            // dd($notAvailableDays);
-            $dateReservation = range($booking->getStartDate()->getTimestamp(),
-                                    $booking->getEndDate()->getTimestamp(),
-                                    24 * 60 * 60
-                                );
             
-            $myDays = array_map(function($day){
-                return new \DateTime(date('Y-m-d', $day));
-            }, $dateReservation);
-
-            $transDays = array_map(function($day){
-                return $day->format('Y-m-d');
-            }, $myDays);
-            dd($myDays, $transDays,$notAvailableDays);
             $booking->setAd($ad);
             $booking->setBooker($this->getUser());
-            $manager->persist($booking);
-            $manager->flush();
-            return $this->redirectToRoute("booking_show",["id"=>$booking->getId(), 'success'=>true]);
+            
+            // si les dates ne sont pas disponibles, message d'erreur
+            if (!$booking->isBookableDates()){
+                $this->addFlash('warning', "Les dates que vous avez saisies ne sont pas disponible !");
+            }
+            else{
+                
+                // sino, enregistrer et redirection
+                $manager->persist($booking);
+                $manager->flush();
+                return $this->redirectToRoute("booking_show",["id"=>$booking->getId(), 'success'=>true]);
+            }
+            
         }
         return $this->render('booking/book.html.twig', [
             'form'  => $form->createView(),

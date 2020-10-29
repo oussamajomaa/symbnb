@@ -263,4 +263,30 @@ class Ad
 
         return $this;
     }
+
+    /**
+     * permet d'obtenir un tableau des jours qui ne sont pas disponibles pour cette annonce
+     * @return array un tableau d'objets datetime
+     */
+    public function getNotAvailaibleDays()
+    {
+        $notAvailableDays=[];
+            
+            foreach ($this->bookings as $booking){
+                //récuprer les jours entre deux dates sous forme timestamp
+                // la fonction range() retourne un tableau
+                $resultat=range(
+                    $booking->getStartDate()->getTimestamp(),
+                    $booking->getEndDate()->getTimestamp(),
+                    24 * 60 * 60 );
+                //transfrormer les jours récupérés sous forme de date php "Y-m-d"
+                // la fonction array_map() retourne un tableau
+                $days=array_map(function($dayTimestamp){
+                    return new \DateTime(date("Y-m-d",$dayTimestamp));
+                }, $resultat);
+                //alimenter le tableau par les jours non disponibles
+                $notAvailableDays= array_merge($notAvailableDays,$days);
+            }
+            return $notAvailableDays;
+    }
 }
